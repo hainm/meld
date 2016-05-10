@@ -1,3 +1,9 @@
+#
+# Copyright 2015 by Justin MacCallum, Alberto Perez, Ken Dill
+# All rights reserved
+#
+
+
 class SystemState(object):
     """
     Class to hold the state of a system.
@@ -6,7 +12,7 @@ class SystemState(object):
     :param velocities: velocities for structure, same as coords
     :param alpha: alpha value, within ``[0, 1]``
     :param energy: total potential energy, including restraints
-    
+
     """
     def __init__(self, positions, velocities, alpha, energy):
         self.positions = positions
@@ -29,7 +35,8 @@ class SystemState(object):
 
         # check velocities
         if not self.positions.shape == self.velocities.shape:
-            raise RuntimeError('velocities must have the same shape as positions')
+            raise RuntimeError(
+                'velocities must have the same shape as positions')
 
         # check alpha
         if self.alpha < 0 or self.alpha > 1:

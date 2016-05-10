@@ -1,3 +1,8 @@
+#
+# Copyright 2015 by Justin MacCallum, Alberto Perez, Ken Dill
+# All rights reserved
+#
+
 from meld import util
 from .system import System
 import subprocess
@@ -32,7 +37,9 @@ class SystemBuilder(object):
             return System(top, crd)
 
     def _set_forcefield(self, forcefield):
-        ff_dict = {'ff12sb': 'leaprc.ff12SB'}
+        ff_dict = {'ff12sb': 'leaprc.ff12SB',
+                   'ff14sb': 'leaprc.ff14SB',
+                   'ff14sbside':  'leaprc.ff14SBonlysc'}
         try:
             self._forcefield = ff_dict[forcefield]
         except KeyError:
@@ -40,7 +47,7 @@ class SystemBuilder(object):
 
     def _set_gb_radii(self, gb_radii):
         allowed = ['mbondi2', 'mbondi3']
-        if not gb_radii in allowed:
+        if gb_radii not in allowed:
             raise RuntimeError('Unknown gb_radii: {}'.format(gb_radii))
         else:
             self._gb_radii = gb_radii
