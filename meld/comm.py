@@ -24,7 +24,7 @@ sys.excepthook = mpi_excepthook
 class MPICommunicator(object):
     """
     Class to handle communications between master and slaves using MPI.
-    
+
     :param n_atoms: number of atoms
     :param n_replicas: number of replicas
 
@@ -252,6 +252,10 @@ class MPICommunicator(object):
             if hosts[0].devices is None:
                 # if CUDA_VISIBLE_DEVICES isn't set on the master, we assume it
                 # isn't set for any node
+                logger.info('CUDA_VISIBLE_DEVICES is not set.')
+                logger.info('Assuming each mpi process has access')
+                logger.info('to a CUDA device, where the device')
+                logger.info('numbering starts from 0.')
 
                 # create an empty default dict to count hosts
                 host_counts = defaultdict(int)
@@ -267,6 +271,7 @@ class MPICommunicator(object):
             else:
                 # CUDA_VISIBLE_DEVICES is set on the master, so we
                 # assume it is set for all nodes
+                logger.info('CUDA_VISIBLE_DEVICES is set.')
 
                 # create a dict to hold the device ids available on each host
                 available_devices = {}
@@ -288,12 +293,17 @@ class MPICommunicator(object):
                 # device ids for each node
                 device_ids = []
                 for host in hosts:
-                    # pop off the first device_id for this host name
-                    device_ids.append(available_devices[host.host_name].pop(0))
+                    try:
+                        # pop off the first device_id for this host name
+                        device_ids.append(available_devices[host.host_name].pop(0))
+                    except IndexError:
+                        logger.error('More mpi processes than GPUs')
+                        raise RuntimeError('More mpi process than GPUs')
 
         # receive device id from master
         else:
             device_ids = None
+
         # do the communication
         device_id = self._mpi_comm.scatter(device_ids, root=0)
         logger.info('hostname: %s, device_id: %d', hostname, device_id)
